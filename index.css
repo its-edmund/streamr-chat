@@ -1,0 +1,32 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans&display=swap");
+body {
+  font-family: "IBM Plex Sans", Tahoma, Geneva, Verdana, sans-serif;
+  padding: 32px;
+}
+
+input {
+  border: 1px solid #000;
+  width: 100%;
+  border-radius: 10px;
+  margin-right: 10px;
+}
+
+button {
+  color: white;
+  border: none;
+  background-color: #323232;
+  border-radius: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 15px;
+  padding-right: 15px;
+  font-weight: 400;
+  font-size: 18px;
+  margin-left: auto;
+}
+
+button::hover {
+  background-color: #525252;
+}
+
+/*# sourceMappingURL=index.css.map */
