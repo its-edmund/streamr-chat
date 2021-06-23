@@ -4,8 +4,10 @@
         <link rel="stylesheet" href="./index.css" />
     </head>
     <body>
-        <h1>chat.</h1>
-        <p id="address"></p>
+        <h1 style="line-height: 0">chat.</h1>
+        <h3>welcome.</h3>
+        <!--<p id="address"></p>-->
+        <div id="messages"></div>
         <div
             style="
                 display: flex;
@@ -20,11 +22,10 @@
             <input type="text" id="message" />
             <button id="submitMessage" onclick="handleSend()">submit.</button>
         </div>
-        <div id="messages"></div>
     </body>
     <script type="text/javascript" src="./bundle.js"></script>
     <script type="text/javascript">
-        const messages = [];
+        let address = "";
         const client = new StreamrClient({
             auth: {
                 ethereum: window.ethereum,
@@ -43,7 +44,7 @@
                 }
             });
 
-        document
+        /* document
             .getElementById("address")
             .append(
                 document.createTextNode(
@@ -51,7 +52,7 @@
                         window.ethereum.selectedAddress || "not connected."
                     }`
                 )
-            );
+            ); */
 
         var client2 = {};
 
@@ -87,19 +88,29 @@
             });
 
             localStorage.setItem("privateKey", user.privateKey);
+            localStorage.setItem("address", user.address);
+            address = user.address;
         } else {
             client2 = new StreamrClient({
                 auth: {
                     privateKey: localStorage.getItem("privateKey"),
                 },
             });
+            address = localStorage.getItem("address");
         }
 
+        console.log(address);
+
         const handleSend = async () => {
+            if (document.getElementById("message").value === "") {
+                return;
+            }
+
             await client2.publish(
                 "0x13327af521d2042f8bd603ee19a4f3a93daa790d/streamr-chat-messages",
                 {
                     message: document.getElementById("message").value,
+                    sender: address,
                 }
             );
 

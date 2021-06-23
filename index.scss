@@ -15,7 +15,7 @@ input {
 button {
   color: white;
   border: none;
-  background-color: #323232;
+  background-color: #FF5C00;
   border-radius: 10px;
   padding-top: 5px;
   padding-bottom: 5px;
@@ -24,6 +24,7 @@ button {
   font-weight: 400;
   font-size: 18px;
   margin-left: auto;
+  cursor: pointer;
 }
 
 button::hover {
