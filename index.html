@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    <head> </head>
+    <body>
+        <h1>chat.</h1>
+        <p id='address'></p>
+        <button onclick="connect()">connect.</button>
+        <input type="text" id="message" />
+        <button onclick="handleSend()">submit.</button>
+        <div id="messages"></div>
+    </body>
+    <script type="text/javascript" src="./bundle.js"></script>
+    <script type="text/javascript">
+        const messages = [];
+        const client = new StreamrClient({
+            auth: {
+                ethereum: window.ethereum
+            },
+        });
+
+        document.getElementById('address').append(document.createTextNode(`address: ${window.ethereum.selectedAddress || "not connected."}`))
+
+        var client2 = {};
+
+        if (localStorage.getItem('privateKey') === null) {
+            let stream;
+
+            let user = StreamrClient.generateEthereumAccount();
+
+            const getStream = async () => {
+                stream = await client.getStream(
+                    "0x13327af521d2042f8bd603ee19a4f3a93daa790d/streamr-chat-messages"
+                );
+
+                if (
+                    stream.hasPermission('stream_publish', user.address) === null
+                ) {
+                    stream.grantPermission('stream_publish', user.address);
+                }
+                if (
+                    stream.hasPermission('stream_subscribe', user.address) ===
+                    null
+                ) {
+                    stream.grantPermission('stream_subscribe', user.address);
+                }
+
+            }
+
+            getStream();
+            client2 = new StreamrClient({
+                auth: {
+                    privateKey: user.privateKey
+                }
+            })
+
+            localStorage.setItem('privateKey', user.privateKey)
+        } else {
+            client2 = new StreamrClient({
+                auth: {
+                    privateKey: localStorage.getItem('privateKey')
+                }
+            })
+        }
+
+        const handleSend = async () => {
+            await client2.publish(
+                "0x13327af521d2042f8bd603ee19a4f3a93daa790d/streamr-chat-messages",
+                {
+                    message: document.getElementById("message").value,
+                }
+            );
+        };
+
+        client2.subscribe(
+            {
+                stream: "0x13327af521d2042f8bd603ee19a4f3a93daa790d/streamr-chat-messages",
+            },
+            (message, metadata) => {
+                const words = document.createElement("p");
+
+                document.getElementById("messages").appendChild(words);
+
+              const dotw = {
+                0: "Sunday",
+                1: "Monday",
+                2: "Tuesday",
+                3: "Wednesday",
+                4: "Thursday",
+                5: "Friday",
+                6: "Saturday"
+              }
+
+                let unix_timestamp = metadata.messageId.timestamp;
+                var date = new Date(unix_timestamp);
+                var hours = date.getHours();
+                var minutes = "0" + date.getMinutes();
+                var seconds = "0" + date.getSeconds();
+                let day = date.getDay();
+
+                var formattedTime =
+                  dotw[day] + " " + hours + ":" + minutes.substr(-2) + ":" + seconds.substr(-2);
+
+                const node = document.createTextNode(formattedTime + " " + message.message);
+                words.append(node);
+            }
+        );
+    </script>
+</html>
