@@ -114,6 +114,42 @@
                 }
             );
 
+            const messageWrapper = document.createElement("div");
+            const words = document.createElement("p");
+
+            const dotw = {
+                0: "Sunday",
+                1: "Monday",
+                2: "Tuesday",
+                3: "Wednesday",
+                4: "Thursday",
+                5: "Friday",
+                6: "Saturday",
+            };
+
+            let unix_timestamp = new Date().getTime();
+            var date = new Date(unix_timestamp);
+            var hours = date.getHours();
+            var minutes = "0" + date.getMinutes();
+            var seconds = "0" + date.getSeconds();
+            let day = date.getDay();
+
+            var formattedTime =
+                dotw[day] +
+                " " +
+                hours +
+                ":" +
+                minutes.substr(-2) +
+                ":" +
+                seconds.substr(-2);
+
+            const node = document.createTextNode(
+                formattedTime + " " + document.getElementById("message").value
+            );
+            messageWrapper.classList.add("sent");
+            words.append(node);
+            messageWrapper.appendChild(words);
+            document.getElementById("messages").appendChild(messageWrapper);
             document.getElementById("message").value = "";
         };
 
@@ -122,6 +158,10 @@
                 stream: "0x13327af521d2042f8bd603ee19a4f3a93daa790d/streamr-chat-messages",
             },
             (message, metadata) => {
+                if (message.sender === address) {
+                    return;
+                }
+
                 const messageWrapper = document.createElement("div");
                 const words = document.createElement("p");
 
@@ -154,7 +194,7 @@
                 const node = document.createTextNode(
                     formattedTime + " " + message.message
                 );
-                messageWrapper.classList.add("sent");
+                messageWrapper.classList.add("received");
                 words.append(node);
                 messageWrapper.appendChild(words);
                 document.getElementById("messages").appendChild(messageWrapper);
