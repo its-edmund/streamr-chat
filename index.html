@@ -122,9 +122,8 @@
                 stream: "0x13327af521d2042f8bd603ee19a4f3a93daa790d/streamr-chat-messages",
             },
             (message, metadata) => {
+                const messageWrapper = document.createElement("div");
                 const words = document.createElement("p");
-
-                document.getElementById("messages").appendChild(words);
 
                 const dotw = {
                     0: "Sunday",
@@ -155,7 +154,10 @@
                 const node = document.createTextNode(
                     formattedTime + " " + message.message
                 );
+                messageWrapper.classList.add("sent");
                 words.append(node);
+                messageWrapper.appendChild(words);
+                document.getElementById("messages").appendChild(messageWrapper);
             }
         );
     </script>
