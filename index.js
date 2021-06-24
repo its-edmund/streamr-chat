@@ -1,4 +1,6 @@
 let address = "";
+const time = new Date().getTime();
+
 const client = new StreamrClient({
   auth: {
     ethereum: window.ethereum,
@@ -14,16 +16,6 @@ document.getElementById("message").addEventListener("keyup", function (event) {
     document.getElementById("submitMessage").click();
   }
 });
-
-/* document
-                .getElementById("address")
-                .append(
-                    document.createTextNode(
-                        `address: ${
-                            window.ethereum.selectedAddress || "not connected."
-                        }`
-                    )
-                ); */
 
 var client2 = {};
 
@@ -85,8 +77,37 @@ const handleSend = async () => {
     }
   );
 
+  generateMessage(
+    document.getElementById("message").value,
+    new Date().getTime(),
+    "sent"
+  );
+  document.getElementById("message").value = "";
+};
+
+client2.subscribe(
+  {
+    stream: "0x13327af521d2042f8bd603ee19a4f3a93daa790d/streamr-chat-messages",
+    resend: {
+      last: 20,
+    },
+  },
+  (message, metadata) => {
+    console.log(metadata);
+    if (message.sender === address) {
+      if (time > metadata.messageId.timestamp) {
+        generateMessage(message.message, metadata.messageId.timestamp, "sent");
+      }
+      return;
+    }
+
+    generateMessage(message.message, metadata.messageId.timestamp, "received");
+  }
+);
+
+const generateMessage = (message, time, type) => {
   const messageWrapper = document.createElement("div");
-  const message = document.createElement("div");
+  const messageBubble = document.createElement("div");
   const words = document.createElement("p");
   const timestamp = document.createElement("h4");
 
@@ -100,7 +121,7 @@ const handleSend = async () => {
     6: "Saturday",
   };
 
-  let unix_timestamp = new Date().getTime();
+  let unix_timestamp = time;
   var date = new Date(unix_timestamp);
   var hours = date.getHours();
   var minutes = "0" + date.getMinutes();
@@ -116,70 +137,16 @@ const handleSend = async () => {
     ":" +
     seconds.substr(-2);
 
-  const node = document.createTextNode(
-    document.getElementById("message").value
-  );
+  const node = document.createTextNode(message);
 
   timestamp.append(formattedTime);
   timestamp.classList.add("timestamp");
-  message.classList.add("sent");
-  messageWrapper.classList.add("wrapper-sent");
+  messageBubble.classList.add(`${type}`);
+  messageWrapper.classList.add(`wrapper-${type}`);
   words.append(node);
-  message.appendChild(words);
+  messageBubble.appendChild(words);
   messageWrapper.appendChild(timestamp);
-  messageWrapper.appendChild(message);
+  messageWrapper.appendChild(messageBubble);
   document.getElementById("messages").appendChild(messageWrapper);
   document.getElementById("message").value = "";
 };
-
-client2.subscribe(
-  {
-    stream: "0x13327af521d2042f8bd603ee19a4f3a93daa790d/streamr-chat-messages",
-  },
-  (message, metadata) => {
-    if (message.sender === address) {
-      return;
-    }
-
-    const messageWrapper = document.createElement("div");
-    const messageBubble = document.createElement("div");
-    const words = document.createElement("p");
-    const timestamp = document.createElement("h4");
-
-    const dotw = {
-      0: "Sunday",
-      1: "Monday",
-      2: "Tuesday",
-      3: "Wednesday",
-      4: "Thursday",
-      5: "Friday",
-      6: "Saturday",
-    };
-
-    let unix_timestamp = metadata.messageId.timestamp;
-    var date = new Date(unix_timestamp);
-    var hours = date.getHours();
-    var minutes = "0" + date.getMinutes();
-    var seconds = "0" + date.getSeconds();
-    let day = date.getDay();
-
-    var formattedTime =
-      dotw[day] +
-      " " +
-      hours +
-      ":" +
-      minutes.substr(-2) +
-      ":" +
-      seconds.substr(-2);
-
-    timestamp.append(formattedTime);
-    timestamp.classList.add("timestamp");
-    messageBubble.classList.add("received");
-    messageWrapper.classList.add("wrapper-received");
-    words.append(message.message);
-    messageBubble.appendChild(words);
-    messageWrapper.appendChild(timestamp);
-    messageWrapper.appendChild(messageBubble);
-    document.getElementById("messages").appendChild(messageWrapper);
-  }
-);
