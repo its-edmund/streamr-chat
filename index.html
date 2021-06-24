@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="UTF-8" />
+        <title>Streamr Chat</title>
         <link rel="stylesheet" href="./index.css" />
     </head>
     <body>
         <h1 style="line-height: 0">chat.</h1>
-        <h3>welcome.</h3>
+        <h3 id='welcome'></h3>
         <!--<p id="address"></p>-->
-        <div id="messages"></div>
+        <div id="messages" style='margin-bottom: 32px'></div>
         <div
             style="
                 display: flex;
@@ -22,148 +24,107 @@
             <input type="text" id="message" />
             <button id="submitMessage" onclick="handleSend()">submit.</button>
         </div>
-    </body>
-    <script type="text/javascript" src="./bundle.js"></script>
-    <script type="text/javascript">
-        let address = "";
-        const client = new StreamrClient({
-            auth: {
-                ethereum: window.ethereum,
-            },
-        });
-
-        document
-            .getElementById("message")
-            .addEventListener("keyup", function (event) {
-                // Number 13 is the "Enter" key on the keyboard
-                if (event.keyCode === 13) {
-                    // Cancel the default action, if needed
-                    event.preventDefault();
-                    // Trigger the button element with a click
-                    document.getElementById("submitMessage").click();
-                }
-            });
-
-        /* document
-            .getElementById("address")
-            .append(
-                document.createTextNode(
-                    `address: ${
-                        window.ethereum.selectedAddress || "not connected."
-                    }`
-                )
-            ); */
-
-        var client2 = {};
-
-        if (localStorage.getItem("privateKey") === null) {
-            let stream;
-
-            let user = StreamrClient.generateEthereumAccount();
-
-            const getStream = async () => {
-                stream = await client.getStream(
-                    "0x13327af521d2042f8bd603ee19a4f3a93daa790d/streamr-chat-messages"
-                );
-
-                if (
-                    stream.hasPermission("stream_publish", user.address) ===
-                    null
-                ) {
-                    stream.grantPermission("stream_publish", user.address);
-                }
-                if (
-                    stream.hasPermission("stream_subscribe", user.address) ===
-                    null
-                ) {
-                    stream.grantPermission("stream_subscribe", user.address);
-                }
-            };
-
-            getStream();
-            client2 = new StreamrClient({
+        <script type="text/javascript" src="./bundle.js"></script>
+        <script type="text/javascript">
+            let address = "";
+            const client = new StreamrClient({
                 auth: {
-                    privateKey: user.privateKey,
+                    ethereum: window.ethereum,
                 },
             });
 
-            localStorage.setItem("privateKey", user.privateKey);
-            localStorage.setItem("address", user.address);
-            address = user.address;
-        } else {
-            client2 = new StreamrClient({
-                auth: {
-                    privateKey: localStorage.getItem("privateKey"),
-                },
-            });
-            address = localStorage.getItem("address");
-        }
+            document
+                .getElementById("message")
+                .addEventListener("keyup", function (event) {
+                    // Number 13 is the "Enter" key on the keyboard
+                    if (event.keyCode === 13) {
+                        // Cancel the default action, if needed
+                        event.preventDefault();
+                        // Trigger the button element with a click
+                        document.getElementById("submitMessage").click();
+                    }
+                });
 
-        console.log(address);
+            /* document
+                .getElementById("address")
+                .append(
+                    document.createTextNode(
+                        `address: ${
+                            window.ethereum.selectedAddress || "not connected."
+                        }`
+                    )
+                ); */
 
-        const handleSend = async () => {
-            if (document.getElementById("message").value === "") {
-                return;
+            var client2 = {};
+
+            if (localStorage.getItem("privateKey") === null) {
+                let stream;
+
+                let user = StreamrClient.generateEthereumAccount();
+
+                const getStream = async () => {
+                    stream = await client.getStream(
+                        "0x13327af521d2042f8bd603ee19a4f3a93daa790d/streamr-chat-messages"
+                    );
+
+                    if (
+                        stream.hasPermission("stream_publish", user.address) ===
+                        null
+                    ) {
+                        stream.grantPermission("stream_publish", user.address);
+                    }
+                    if (
+                        stream.hasPermission(
+                            "stream_subscribe",
+                            user.address
+                        ) === null
+                    ) {
+                        stream.grantPermission(
+                            "stream_subscribe",
+                            user.address
+                        );
+                    }
+                };
+
+                getStream();
+                client2 = new StreamrClient({
+                    auth: {
+                        privateKey: user.privateKey,
+                    },
+                });
+
+                localStorage.setItem("privateKey", user.privateKey);
+                localStorage.setItem("address", user.address);
+                address = user.address;
+            } else {
+                client2 = new StreamrClient({
+                    auth: {
+                        privateKey: localStorage.getItem("privateKey"),
+                    },
+                });
+                address = localStorage.getItem("address");
             }
 
-            await client2.publish(
-                "0x13327af521d2042f8bd603ee19a4f3a93daa790d/streamr-chat-messages",
-                {
-                    message: document.getElementById("message").value,
-                    sender: address,
-                }
-            );
+            document.getElementById('welcome').append(document.createTextNode(`welcome, ${address || 'your account isn\'t connected'}.`))
 
-            const messageWrapper = document.createElement("div");
-            const words = document.createElement("p");
-
-            const dotw = {
-                0: "Sunday",
-                1: "Monday",
-                2: "Tuesday",
-                3: "Wednesday",
-                4: "Thursday",
-                5: "Friday",
-                6: "Saturday",
-            };
-
-            let unix_timestamp = new Date().getTime();
-            var date = new Date(unix_timestamp);
-            var hours = date.getHours();
-            var minutes = "0" + date.getMinutes();
-            var seconds = "0" + date.getSeconds();
-            let day = date.getDay();
-
-            var formattedTime =
-                dotw[day] +
-                " " +
-                hours +
-                ":" +
-                minutes.substr(-2) +
-                ":" +
-                seconds.substr(-2);
-
-            const node = document.createTextNode(
-                formattedTime + " " + document.getElementById("message").value
-            );
-            messageWrapper.classList.add("sent");
-            words.append(node);
-            messageWrapper.appendChild(words);
-            document.getElementById("messages").appendChild(messageWrapper);
-            document.getElementById("message").value = "";
-        };
-
-        client2.subscribe(
-            {
-                stream: "0x13327af521d2042f8bd603ee19a4f3a93daa790d/streamr-chat-messages",
-            },
-            (message, metadata) => {
-                if (message.sender === address) {
+            const handleSend = async () => {
+                if (document.getElementById("message").value === "") {
                     return;
                 }
 
+                await client2.publish(
+                    "0x13327af521d2042f8bd603ee19a4f3a93daa790d/streamr-chat-messages",
+                    {
+                        message: document.getElementById("message").value,
+                        sender: address,
+                    }
+                );
+
+
                 const messageWrapper = document.createElement("div");
+                const message = document.createElement('div')
                 const words = document.createElement("p");
+                const timestamp = document.createElement('h4');
 
                 const dotw = {
                     0: "Sunday",
@@ -175,7 +136,7 @@
                     6: "Saturday",
                 };
 
-                let unix_timestamp = metadata.messageId.timestamp;
+                let unix_timestamp = new Date().getTime();
                 var date = new Date(unix_timestamp);
                 var hours = date.getHours();
                 var minutes = "0" + date.getMinutes();
@@ -192,13 +153,72 @@
                     seconds.substr(-2);
 
                 const node = document.createTextNode(
-                    formattedTime + " " + message.message
+                    document.getElementById("message").value
                 );
-                messageWrapper.classList.add("received");
+
+                timestamp.append(formattedTime)
+                timestamp.classList.add('timestamp')
+                message.classList.add("sent");
+                messageWrapper.classList.add('wrapper-sent')
                 words.append(node);
-                messageWrapper.appendChild(words);
+                message.appendChild(words);
+                messageWrapper.appendChild(timestamp);
+                messageWrapper.appendChild(message);
                 document.getElementById("messages").appendChild(messageWrapper);
-            }
-        );
-    </script>
+                document.getElementById("message").value = "";
+            };
+
+            client2.subscribe(
+                {
+                    stream: "0x13327af521d2042f8bd603ee19a4f3a93daa790d/streamr-chat-messages",
+                },
+                (message, metadata) => {
+                    /*if (message.sender === address) {
+                        return;
+                    }*/
+
+                const messageWrapper = document.createElement("div");
+                const messageBubble = document.createElement('div')
+                const words = document.createElement("p");
+                const timestamp = document.createElement('h4');
+
+                    const dotw = {
+                        0: "Sunday",
+                        1: "Monday",
+                        2: "Tuesday",
+                        3: "Wednesday",
+                        4: "Thursday",
+                        5: "Friday",
+                        6: "Saturday",
+                    };
+
+                    let unix_timestamp = metadata.messageId.timestamp;
+                    var date = new Date(unix_timestamp);
+                    var hours = date.getHours();
+                    var minutes = "0" + date.getMinutes();
+                    var seconds = "0" + date.getSeconds();
+                    let day = date.getDay();
+
+                    var formattedTime =
+                        dotw[day] +
+                        " " +
+                        hours +
+                        ":" +
+                        minutes.substr(-2) +
+                        ":" +
+                        seconds.substr(-2);
+
+                    timestamp.append(formattedTime)
+                    timestamp.classList.add('timestamp')
+                    messageBubble.classList.add("received");
+                    messageWrapper.classList.add('wrapper-received')
+                    words.append(message.message);
+                    messageBubble.appendChild(words);
+                    messageWrapper.appendChild(timestamp);
+                    messageWrapper.appendChild(messageBubble);
+                    document.getElementById("messages").appendChild(messageWrapper);
+                }
+            );
+        </script>
+    </body>
 </html>

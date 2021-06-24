@@ -14,7 +14,7 @@ input {
 button {
   color: white;
   border: none;
-  background-color: #FF5C00;
+  background-color: #ff5c00;
   border-radius: 10px;
   padding-top: 5px;
   padding-bottom: 5px;
@@ -32,28 +32,41 @@ button::hover {
 
 .received {
   background-color: #dedede;
-  max-width: 25vw;
   word-wrap: break-word;
-  padding-right: 10px;
-  padding-left: 10px;
+  padding-right: 20px;
+  padding-left: 20px;
   padding-top: 5px;
   padding-bottom: 5px;
   margin-top: 8px;
-  border-radius: 10px 10px 10px 0;
+  border-radius: 15px 15px 15px 0;
 }
 
 .sent {
-  background-color: #0D009A;
+  background-color: #0d009a;
   color: white;
-  max-width: 25vw;
   word-wrap: break-word;
-  padding-right: 10px;
-  padding-left: 10px;
+  padding-right: 20px;
+  padding-left: 20px;
   padding-top: 5px;
   padding-bottom: 5px;
   margin-top: 8px;
+  border-radius: 15px 15px 0 15px;
+}
+
+.timestamp {
+  line-height: 0px;
+  font-size: 12px;
+  color: #525252;
+  margin-left: 5px;
+}
+
+.wrapper-sent {
   margin-left: auto;
-  border-radius: 10px 10px 0 10px;
+  max-width: 25vw;
+}
+
+.wrapper-received {
+  max-width: 25vw;
 }
 
 /*# sourceMappingURL=index.css.map */
